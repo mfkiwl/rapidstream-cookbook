@@ -5,22 +5,19 @@ The contributor(s) of this file has/have agreed to the RapidStream Contributor L
 
 <img src="https://imagedelivery.net/AU8IzMTGgpVmEBfwPILIgw/1b565657-df33-41f9-f29e-0d539743e700/128" width="64px" alt="RapidStream Logo" />
 
-# AMD Vitis Design
+# TAPA Design
 
 ## Introduction
 
-Rapidsteam is fully compatible with AMD Vitis by taking Vitis object files (`.xo`) as input, performing optimization and generating optimized `.xo` files as output. Therefore, users can use `v++ -link` to continue their Vitis development flow.
-
-<img src="../../common/img/rapidsteram_xo.png" width="600" alt="rapidstream_xo.png">
-
-In this recipe, we illustrate how to create a Vitis objective file (`.xo`) using Vitis, then optimize the `.xo` file with Rapidstream, and finally utilize the optimized output in the ongoing Vitis development process.
+Rapidsteam is fully compatible with [TAPA](https://github.com/rapidstream-org/rapidstream-tapa).
+In this recipe, we illustrate how to create a Xilinx objective file (`.xo`) using TAPA, then optimize the `.xo` file with Rapidstream, and finally utilize the optimized output in the ongoing Vitis development process.
 
 
 ## Xilinx Object Files
 
 [Vitis compiled object files (`.xo`)](https://docs.amd.com/r/en-US/ug1393-vitis-application-acceleration/Design-Topology) are IP packages used in the AMD Vitis kernel development flow for programming the programmable logic (PL) region of target devices.
 
-These files can be [generated from HLS C++ code](https://docs.amd.com/r/en-US/ug1393-vitis-application-acceleration/Developing-PL-Kernels-using-C) using the `v++` command, [packed from RTL code](https://docs.amd.com/r/en-US/ug1393-vitis-application-acceleration/RTL-Kernel-Development-Flow), or created using third-party frameworks like [TAPA](https://github.com/UCLA-VAST/tapa). In this example, we use `v++` to generate the `VecAdd.xo` file, but the same flow applies to object files generated through other methods.
+These files can be [generated from HLS C++ code](https://docs.amd.com/r/en-US/ug1393-vitis-application-acceleration/Developing-PL-Kernels-using-C) using the `v++` command, [packed from RTL code](https://docs.amd.com/r/en-US/ug1393-vitis-application-acceleration/RTL-Kernel-Development-Flow), or created using third-party frameworks like [RapidStream TAPA](https://github.com/rapidstream-org/rapidstream-tapa). In this example, we use `RapidStream TAPA` to generate the `VecAdd.xo` file, but the same flow applies to object files generated through other methods.
 
 
 ## Tutorial
@@ -37,83 +34,37 @@ source <Vitis_install_path>/Vitis/2023.2/settings64.sh
 Before generating the `.xo` file, we recommend running a C++ simulation to verify the correctness of the design. This step is optional but highly recommended. Run the following command or `make csim` to perform C++ simulation:
 
 ```bash
-g++ -I ${XILINX_HLS}/include ./design/VecAdd.cpp ./design/main.cpp -o main.exe
-./main.exe
+tapa g++ design/main.cpp design/VecAdd.cpp \
+-I /opt/tools/xilinx/Vitis_HLS/2023.2/include \
+-o build/run_u55c.py/main.exe -O2
+./build/run_u55c.py/main.exe
 ```
 
 Your should see the following output:
 
 ```bash
+I20241010 15:14:52.494259 4113880 task.h:66] running software simulation with TAPA library
+kernel time: 0.0197967 s
 PASS!
-INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the design is 4096
 ```
 
-### Step 2: Targeting Vitis Software Emulation
+### Step 2: Generate the Xilinx Object File (`.xo`)
 
-AMD Vitis provides an easy way to target software emulation for debugging and performance analysis. To target software emulation, your need to source Vitis and XRT environment setting up scripts and run the following command or run `make TARGET=sw_emu sw_emu`:
+We use TAPA on top of 2023.2 to generate the `.xo` file. Run the following command or run `make xo`:
 
 ```bash
 source <Vitis_install_path>/Vitis/2023.2/settings64.sh
-source /opt/xilinx/xrt/setup.sh
-
-v++ -c -t sw_emu \
-	--platform xilinx_u280_gen3x16_xdma_1_202211_1 \
-	-k VecAdd \
-	--temp_dir build \
-	-o build/VecAdd.xo \
-	design/VecAdd.cpp design/VecAdd.h
-
-v++ -l -t sw_emu \
-	--platform xilinx_u280_gen3x16_xdma_1_202211_1 \
-	--kernel VecAdd \
-	--connectivity.nk VecAdd:1:VecAdd \
-	--config design/link_config.ini \
-	--temp_dir build \
-	-o build/VecAdd.xclbin \
-	build/VecAdd.xo
-
-g++ -Wall -g -std=c++11 design/host.cpp -o app.exe \
-	-I${XILINX_XRT}/include/ \
-	-I${XILINX_VIVADO}/include/ \
-	-L${XILINX_XRT}/lib/ -lOpenCL -lpthread -lrt -lstdc++
-
-XCL_EMULATION_MODE=sw_emu ./app.exe build/VecAdd.xclbin
+mkdir -p build/run_u55c.py
+cd build/run_u55c.py && tapa compile \
+--top VecAdd \
+--part-num xcu280-fsvh2892-2L-e \
+--clock-period 3.33 \
+-o VecAdd.xo \
+-f design/VecAdd.cpp \
+2>&1 | tee tapa.log
 ```
 
-You would see the following output:
-
-```bash
-Trying to program device[0]: xilinx:pcie-hw-em:7v3:1.0
-Kernel Name: VecAdd, CU Number: 0, Thread creation status: success
-Device[0]: xclbin is loaded successfully!
-Kernel Name: VecAdd, CU Number: 0, State: Start
-Kernel Name: VecAdd, CU Number: 0, State: Running
-Kernel Name: VecAdd, CU Number: 0, State: Idle
-TEST PASSED!
-device process sw_emu_device done
-Kernel Name: VecAdd, CU Number: 0, Status: Shutdown
-INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the design is 4096
-```
-
-:warning: **Note**: Clean the sw_emu `.xo` file before next steps by running `make clean`.
-
-### Step 3: Generate the Xilinx Object File (`.xo`)
-
-We use Vitis 2023.2 to generate the `.xo` file. Run the following command or run `make xo`:
-
-```bash
-source <Vitis_install_path>/Vitis/2023.2/settings64.sh
-make clean
-cd <repo root>/getting_started/vitis_source
-v++ -c -t hw \
-	--platform xilinx_u280_gen3x16_xdma_1_202211_1 \
-	-k VecAdd \
-	--temp_dir build \
-	-o build/VecAdd.xo \
-	design/VecAdd.cpp design/VecAdd.h
-```
-
-### Step 4 (Optional): Use Vitis --link to Generate the `.xclbin` File
+### Step 3 (Optional): Use Vitis --link to Generate the `.xclbin` File
 
 With the `.xo` file generated, you can use `v++ -link` to generate the `.xclbin` file. Run the following command or execute `make hw`:
 
@@ -143,16 +94,16 @@ The RapidStream flow conducts design space exploration and generates optimized `
 
 1. **Device**: Specify the Vitis platform name for `v++`.
 2. **Xilinx Object file** (.xo): Provide the file generated by `v++` or Vivado.
-3. **Connectivity** (.ini): Include the configuration file for `v++` ([link_config.ini](./design/link_config.ini)).
+3. **Connectivity** (.ini): Include the configuration file for `v++` ([link_config.ini](./design/config/run_u55c.py/link_config.ini)).
 4. **Clock targets**: Define the desired clock frequencies.
 5. RapidStream automatically handles all other aspects of the flow.
 
-Please refer to [run.py](./run.py) for the complete RapidStream flow.
+Please refer to [run_u55c.py](./run_u55c.py) for the complete RapidStream flow.
 To execute the flow and generate optimized `.xo` files,
 Run the following command or execute `make rs_opt`:
 
 ```bash
-rapidstream ./run.py
+rapidstream ./run_u55c.py
 ```
 
 When finished, you can locate these files using the following command:

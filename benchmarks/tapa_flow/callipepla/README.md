@@ -59,7 +59,7 @@ The RapidStream flow for TAPA requires the following key inputs:
 
 - **tapa-xo-path**: The path to the tapa-generated `xo` file (Callipepla.xo.xo).
 - **device-config**: The virtual device (`device.json`) generated in previous step 1 by calling rapidstream APIs based on platform.
-- **floorplan-config**: The configure file ([ab_config.json](design/config/run_u55c.py/ab_config.json)) to guide integrated Autobridge to floorplan the design.
+- **floorplan-config**: The configure file ([floorplan_config.json](design/config/run_u55c.py/floorplan_config.json)) to guide integrated Autobridge to floorplan the design.
 - **implementation-config**: The configure file ([impl_config.json](design/config/run_u55c.py/impl_config.json)) to guide Vitis to implement the design (e.g., kernek clock, vitis_platform and etc.).
 - **connectivity-ini**: The link configure file ([link_config.ini](design/config/run_u55c.py/link_config.ini)) to specify how the kernel interfaces are connected the memory controller. This is
 the same for vitis link configure file.

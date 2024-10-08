@@ -30,7 +30,7 @@ git clone https://github.com/rapidstream-org/rapidstream-cookbook.git
 cd rapidstream-cookbook
 ```
 
-You must have RapidStream installed, a valid RapidStream license, and a valid Vivado Design Suite license to download or run the cookbooks. If you are an academic researcher or would like to contribute to this cookbook, please contact us at https://rapidstream-da.com/ for a free RapidStream license.
+You must have RapidStream installed from [here](https://tapa.readthedocs.io/en/main/user/installation.html) with a valid RapidStream license, and a valid Vivado Design Suite license to download or run the cookbooks. If you are an academic researcher or would like to contribute to this cookbook, please contact us at https://rapidstream-da.com/ for a free RapidStream license.
 
 We recommend using Vivado version 2023.2 or later. Source the Vivado settings script before running the RapidStream Python scripts. For example, to source the Vivado settings script, run the following command:
 
@@ -39,10 +39,11 @@ We recommend using Vivado version 2023.2 or later. Source the Vivado settings sc
 source <Vivado_installation_path>/Vivado/2023.2/settings64.sh
 ```
 
-All RapidStream Python script recipes (`*.py`) in this cookbook should be executed using the `rapidstream` command. For example, to run `getting_started/mixed_sources/run.py`, use the following command:
+We've created a `Makefile` for each recipe in this repository to help you get started quickly. Simply navigate to the specific example directory and run `make` to compile.
 
 ```bash
-rapidstream getting_started/mixed_sources/run.py
+cd getting_started/mixed_sources
+make
 ```
 
 The default branch always matches the latest RapidStream release. Please update your software before using the recipes.
@@ -237,13 +238,6 @@ Recipes
             <td>Vitis U280 XDMA</td>
             <td>TAPA HLS</td>
             <td>Accelerator for ORC Decoder.</td>
-        </tr>
-        <tr>
-            <td><a href="benchmarks/tapa_flow/autosa_cnn">Convolutional neural network</a></td>
-            <td><a href="https://dl.acm.org/doi/10.1145/3431920.3439292">Wang <i>et al.</i><br/>(FPGA '21)</a></td>
-            <td>Vitis U250 XDMA</td>
-            <td>TAPA HLS</td>
-            <td>Systolic array accelerator for a convolutional neural network layer.</td>
         </tr>
     </tbody>
 </table>

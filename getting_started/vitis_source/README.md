@@ -158,10 +158,10 @@ rapidstream ./run.py
 When finished, you can locate these files using the following command:
 
 ```bash
-find ./build/dse/ -name *.xo
+find ./build/run.py/dse/ -name *.xo
 ```
 
-If everything is successful, you should at least get one optimized `.xo` file located in `./build/dse/candidate_0/exported/VecAdd.xo`.
+If everything is successful, you should at least get one optimized `.xo` file located in `./build/run.py/dse/candidate_0/exported/VecAdd.xo`.
 
 ### Step 6: Check the Group Module Report
 
@@ -187,9 +187,8 @@ The module types for your design can be found in `build/module_types.csv`. Below
 | Module Name                      | Group Type     |
 |:--------------------------------:|:--------------:|
 | VecAdd                           | grouped_module |
-|__rs_ap_ctrl_start_ready_pipeline | grouped_module |
-|__rs_ff_pipeline                  | grouped_module |
-|__rs_hs_pipeline                  | grouped_module |
+| __rs_VecAdd_aux                  |  aux_module    |
+| ...                              | verilog_module |
 
 
 ### Step 7: Use Vitis --link with the Optimized `.xo` File

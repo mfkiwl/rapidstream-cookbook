@@ -60,6 +60,7 @@ cd build/run_u55c.py && tapa compile \
 2>&1 | tee tapa.log
 
 ```
+
 ### Step 2: Define Virtual Device
 
 In this tutorial, we use the [Alveo U55C](https://www.amd.com/en/products/accelerators/alveo/u55c/a-u55c-p00g-pq-g.html) as an example. The device is organized into six slots, each
@@ -104,7 +105,7 @@ rapidstream-tapaopt --work-dir build/run_u55c.py \
 
 If everything is successful, you should at least get one optimized `.xclbin` file.
 
-### Step 3: Check the Group Module Report
+### Step 4: Check the Group Module Report
 
 
 RapidStream mandates a clear distinction between communication and computation within user designs.
