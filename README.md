@@ -63,6 +63,9 @@ Recipes
             <td><a href="./getting_started/vitis_source">AMD Vitis Design</a></td>
             <td><a href="./getting_started/mixed_sources">Mixed Sources Design</a></td>
         </tr>
+        <tr>
+            <td><a href="./getting_started/tapa_source">Rapidstream TAPA Design</a></td>
+        </tr>
         <tr><td colspan="3"><strong>Custom Devices</strong></td></tr>
         <tr>
             <td><a href="./getting_started/device_factory_vitis_platform">Custom Vitis Platforms</a></td>
@@ -71,6 +74,78 @@ Recipes
     </tbody>
 </table>
 
+
+<table border="0" width="100%">
+    <tbody>
+        <tr><td colspan="5"  align="center"><h2><a href="./benchmarks/tapa_flow/">TAPA Flow Benchmarks</a></h2></td></tr>
+        <tr><td colspan="5">
+            Discover how RapidStream flow streamlines FPGA acceleration design of state-of-the-art architectures, enabling you to achieve optimal performance for performance-critical systems.
+        </td></tr>
+        <tr><td colspan="5"><strong>Scientific Computation</strong></td></tr>
+        <tr>
+            <td ><strong>Design</strong></td>
+            <td><strong>Developer</strong></td>
+            <td><strong>Platforms</strong></td>
+            <td><strong>Sources</strong></td>
+            <td><strong>Purpose</strong></td>
+        </tr>
+            <td><a href="benchmarks/tapa_flow/serpens">Serpens</a></td>
+            <td><a href="https://dl.acm.org/doi/abs/10.1145/3489517.3530420">Song <i>et al.</i><br/>(FPGA '22)</a></td>
+            <td>Vitis U55C XDMA</td>
+            <td>TAPA HLS</td>
+            <td>Accelerator for general-purpose sparse-matrix dense-matrix multiplication.</td>
+        </tr>
+        </tr>
+            <td><a href="benchmarks/tapa_flow/sextans">Sextans</a></td>
+            <td><a href="https://dl.acm.org/doi/abs/10.1145/3490422.3502357">Song <i>et al.</i><br/>(FPGA '22)</a></td>
+            <td>Vitis U55C XDMA</td>
+            <td>TAPA HLS</td>
+            <td>Accelerator for general-purpose sparse-matrix dense-matrix multiplication.</td>
+        </tr>
+        </tr>
+            <td><a href="benchmarks/tapa_flow/callipepla">Callipepla</a></td>
+            <td><a href="https://dl.acm.org/doi/abs/10.1145/3543622.3573182">Song <i>et al.</i><br/>(FPGA '22)</a></td>
+            <td>Vitis U55C XDMA</td>
+            <td>TAPA HLS</td>
+            <td>Accelerator for general-purpose sparse-matrix dense-matrix multiplication.</td>
+        </tr>
+        <tr>
+            <td><a href="benchmarks/tapa_flow/digit_recognizer">KNN Digit Recognition</a></td>
+            <td><a href="https://github.com/icgrp/hipr">Xiao <i>et al.</i><br/>(FPL '22)</a></td>
+            <td>Vitis U55C XDMA</td>
+            <td>TAPA HLS</td>
+            <td>K-Nearest Neighbours for Digit Recognition.</td>
+        </tr>
+        </tr>
+            <td><a href="benchmarks/tapa_flow/bloomFilter">Bloom Filter</a></td>
+            <td><a href="https://www.sfu.ca/~zhenman/">Simon Fraser University</a></td>
+            <td>Vitis U55C XDMA</td>
+            <td>TAPA HLS</td>
+            <td>Accelerator for Bloom Filter.</td>
+        </tr>
+        </tr>
+            <td><a href="benchmarks/tapa_flow/stencil_sasa">Stencil Application</a></td>
+            <td><a href="https://www.sfu.ca/~zhenman/">Simon Fraser University</a></td>
+            <td>Vitis U55C XDMA</td>
+            <td>TAPA HLS</td>
+            <td>Accelerator for Stencil Application.</td>
+        </tr>
+        </tr>
+            <td><a href="benchmarks/tapa_flow/knn_chipknn">KNN</a></td>
+            <td><a href="https://www.sfu.ca/~zhenman/">Simon Fraser University</a></td>
+            <td>Vitis U55C XDMA</td>
+            <td>TAPA HLS</td>
+            <td>Accelerator for K-Nearest-Neighbor.</td>
+        </tr>
+        </tr>
+            <td><a href="benchmarks/tapa_flow/orcDecoder">ORC Decoder</a></td>
+            <td><a href="https://www.sfu.ca/~zhenman/">Simon Fraser University</a></td>
+            <td>Vitis U55C XDMA</td>
+            <td>TAPA HLS</td>
+            <td>Accelerator for ORC Decoder.</td>
+        </tr>
+    </tbody>
+</table>
 
 
 <table border="0" width="100%">
@@ -169,78 +244,6 @@ Recipes
     </tbody>
 </table>
 
-
-<table border="0" width="100%">
-    <tbody>
-        <tr><td colspan="5"  align="center"><h2><a href="./benchmarks/tapa_flow/">TAPA Flow Benchmarks</a></h2></td></tr>
-        <tr><td colspan="5">
-            Discover how RapidStream flow streamlines FPGA acceleration design of state-of-the-art architectures, enabling you to achieve optimal performance for performance-critical systems.
-        </td></tr>
-        <tr><td colspan="5"><strong>Scientific Computation</strong></td></tr>
-        <tr>
-            <td ><strong>Design</strong></td>
-            <td><strong>Developer</strong></td>
-            <td><strong>Platforms</strong></td>
-            <td><strong>Sources</strong></td>
-            <td><strong>Purpose</strong></td>
-        </tr>
-            <td><a href="benchmarks/tapa_flow/serpens">Serpens</a></td>
-            <td><a href="https://dl.acm.org/doi/abs/10.1145/3489517.3530420">Song <i>et al.</i><br/>(FPGA '22)</a></td>
-            <td>Vitis U280 XDMA</td>
-            <td>TAPA HLS</td>
-            <td>Accelerator for general-purpose sparse-matrix dense-matrix multiplication.</td>
-        </tr>
-        </tr>
-            <td><a href="benchmarks/tapa_flow/sextans">Sextans</a></td>
-            <td><a href="https://dl.acm.org/doi/abs/10.1145/3490422.3502357">Song <i>et al.</i><br/>(FPGA '22)</a></td>
-            <td>Vitis U250 XDMA</td>
-            <td>TAPA HLS</td>
-            <td>Accelerator for general-purpose sparse-matrix dense-matrix multiplication.</td>
-        </tr>
-        </tr>
-            <td><a href="benchmarks/tapa_flow/callipepla">Callipepla</a></td>
-            <td><a href="https://dl.acm.org/doi/abs/10.1145/3543622.3573182">Song <i>et al.</i><br/>(FPGA '22)</a></td>
-            <td>Vitis U280 XDMA</td>
-            <td>TAPA HLS</td>
-            <td>Accelerator for general-purpose sparse-matrix dense-matrix multiplication.</td>
-        </tr>
-        <tr>
-            <td><a href="benchmarks/tapa_flow/digit_recognizer">KNN Digit Recognition</a></td>
-            <td><a href="https://github.com/icgrp/hipr">Xiao <i>et al.</i><br/>(FPL '22)</a></td>
-            <td>Vitis U280 XDMA</td>
-            <td>TAPA HLS</td>
-            <td>K-Nearest Neighbours for Digit Recognition.</td>
-        </tr>
-        </tr>
-            <td><a href="benchmarks/tapa_flow/bloomFilter">Bloom Filter</a></td>
-            <td><a href="https://www.sfu.ca/~zhenman/">Simon Fraser University</a></td>
-            <td>Vitis U280 XDMA</td>
-            <td>TAPA HLS</td>
-            <td>Accelerator for Bloom Filter.</td>
-        </tr>
-        </tr>
-            <td><a href="benchmarks/tapa_flow/stencil_sasa">Stencil Application</a></td>
-            <td><a href="https://www.sfu.ca/~zhenman/">Simon Fraser University</a></td>
-            <td>Vitis U280 XDMA</td>
-            <td>TAPA HLS</td>
-            <td>Accelerator for Stencil Application.</td>
-        </tr>
-        </tr>
-            <td><a href="benchmarks/tapa_flow/knn_chipknn">KNN</a></td>
-            <td><a href="https://www.sfu.ca/~zhenman/">Simon Fraser University</a></td>
-            <td>Vitis U280 XDMA</td>
-            <td>TAPA HLS</td>
-            <td>Accelerator for K-Nearest-Neighbor.</td>
-        </tr>
-        </tr>
-            <td><a href="benchmarks/tapa_flow/orcDecoder">ORC Decoder</a></td>
-            <td><a href="https://www.sfu.ca/~zhenman/">Simon Fraser University</a></td>
-            <td>Vitis U280 XDMA</td>
-            <td>TAPA HLS</td>
-            <td>Accelerator for ORC Decoder.</td>
-        </tr>
-    </tbody>
-</table>
 
 
 How to Get Help

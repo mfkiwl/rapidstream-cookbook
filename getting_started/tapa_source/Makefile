@@ -16,12 +16,12 @@ TARGET           := hw
 TEMP_DIR         := $(CURDIR)/build/$(notdir $(RS_SCRIPT))
 KERNEL_XO        := $(TEMP_DIR)/$(KERNEL_NAME).xo
 KERNEL_XCLBIN    := $(TEMP_DIR)/$(KERNEL_NAME).xclbin
-RS_KERNEL_XCLBIN := $(TEMP_DIR)/dse/solution_0/vitis_run_hw/$(KERNEL_NAME)_$(PLATFORM).xclbin
+RS_XCLBIN        := $(TEMP_DIR)/dse/solution_0/vitis_run_hw/$(KERNEL_NAME)_$(PLATFORM).xclbin
 INCLUDE          := -I $(XILINX_HLS)/include
 CFLAGS           := $(INCLUDE) $(OPT_LEVEL)
 CXX              := g++
 HOST             := app.exe
-RS_TARGET        := $(TEMP_DIR)/dse/candidate_0/exported/VecAdd.xo
+RS_TARGET        := $(TEMP_DIR)/dse/solution_0/updated.xo
 TIMING_RPT       := impl_1_hw_bb_locked_timing_summary_routed.rpt
 SUCCESS          := "Build Successful"
 SLACK_GETTER     := $(ROOT_DIR)/common/util/get_slack.py
@@ -31,12 +31,21 @@ RSPATH           := $(CURDIR)
 RSPYTHON         := rapidstream
 DEVICE_CONFIG    := $(TEMP_DIR)/device.json
 
-all: $(RS_KERNEL_XCLBIN)
+all: $(RS_XCLBIN)
 	$(RSXX) $(SLACK_GETTER) -d $(TEMP_DIR) -i $(TIMING_RPT) -o $(BUILD_LOG)  -c clk_kernel_00_unbuffered_net -p 3.333
 	echo $(SUCCESS)
 
+$(RS_XCLBIN): $(RS_TARGET)
+	v++ -l -t ${TARGET} \
+	--platform $(PLATFORM) \
+	--kernel $(KERNEL_NAME) \
+	--connectivity.nk $(KERNEL_NAME):1:$(KERNEL_NAME) \
+	--config $(LINK_CONFIG) \
+	--temp_dir $(TEMP_DIR) \
+	-o $@ \
+	$^
 
-$(RS_KERNEL_XCLBIN):$(KERNEL_XO) $(DEVICE_CONFIG) $(AB_CONFIG)
+$(RS_TARGET):$(KERNEL_XO) $(DEVICE_CONFIG) $(AB_CONFIG)
 	mkdir -p $(TEMP_DIR)
 	cd $(RSPATH) && $(RSXX)-tapaopt \
     --work-dir $(TEMP_DIR) \
@@ -44,8 +53,9 @@ $(RS_KERNEL_XCLBIN):$(KERNEL_XO) $(DEVICE_CONFIG) $(AB_CONFIG)
     --device-config $(DEVICE_CONFIG) \
     --floorplan-config $(AB_CONFIG) \
     --implementation-config $(IMPL_CONFIG) \
-	--run-impl \
     --connectivity-ini $(LINK_CONFIG)
+
+device: $(DEVICE_CONFIG)
 
 $(DEVICE_CONFIG):$(RS_SCRIPT)
 	mkdir -p $(TEMP_DIR)
@@ -85,7 +95,7 @@ $(TEMP_DIR)/main.exe: $(SRC_DIR)/main.cpp $(SRC_DIR)/VecAdd.cpp
 
 show_groups:
 	@echo $(RS_KERNEL_XCLBIN)
-	$(RSXX) $(GRP_UTIL) -i $(TEMP_DIR)/passes/0-imported.json \
+	$(RSXX) $(GRP_UTIL) -i $(TEMP_DIR)/passes/1-importer.json \
 	-o $(TEMP_DIR)/module_types.csv
 
 
