@@ -15,21 +15,21 @@ using std::clog;
 using std::endl;
 using std::vector;
 
-#define DATA_SIZE 4096
+#define DATA_NUM 4096
 
 void VecAdd(tapa::mmap<const uint32_t> mem_in1, tapa::mmap<const uint32_t> mem_in2, tapa::mmap<uint32_t> mem_out);
 DEFINE_string(bitstream, "", "path to bitstream file, run csim if empty");
 
 int main(int argc, char **argv)
 {
-  vector<uint32_t> mem_in1(DATA_SIZE);
-  vector<uint32_t> mem_in2(DATA_SIZE);
-  vector<uint32_t> mem_out(DATA_SIZE);
-  vector<uint32_t> out_golden(DATA_SIZE);
+  vector<uint32_t> mem_in1(DATA_NUM);
+  vector<uint32_t> mem_in2(DATA_NUM);
+  vector<uint32_t> mem_out(DATA_NUM);
+  vector<uint32_t> out_golden(DATA_NUM);
 
-  for(int i=0; i<DATA_SIZE; i++){
-    mem_in1[i] = static_cast<float>(rand() % DATA_SIZE);
-    mem_in2[i] = static_cast<float>(rand() % DATA_SIZE);
+  for(int i=0; i<DATA_NUM; i++){
+    mem_in1[i] = static_cast<float>(rand() % DATA_NUM);
+    mem_in2[i] = static_cast<float>(rand() % DATA_NUM);
     out_golden[i] = mem_in1[i] + mem_in2[i];
   }
 
@@ -37,7 +37,7 @@ int main(int argc, char **argv)
     VecAdd, FLAGS_bitstream, tapa::read_only_mmap<const uint32_t>(mem_in1),
       tapa::read_only_mmap<const uint32_t>(mem_in2), tapa::write_only_mmap<uint32_t>(mem_out));
 
-  for(int i=0; i<DATA_SIZE; i++){
+  for(int i=0; i<DATA_NUM; i++){
     if(out_golden[i] != mem_out[i]){
       printf("out[%d] is wrong!\n", i);
       return 1;
