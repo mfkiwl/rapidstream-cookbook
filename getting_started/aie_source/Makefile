@@ -1,106 +1,86 @@
 # Copyright (c) 2024 RapidStream Design Automation, Inc. and contributors.  All rights reserved.
 # The contributor(s) of this file has/have agreed to the RapidStream Contributor License Agreement.
 
-ROOT_DIR         := $(shell git rev-parse --show-toplevel)
-PLATFORM         := xilinx_u280_gen3x16_xdma_1_202211_1
-PART_NUM         := xcu280-fsvh2892-2L-e
-GRP_UTIL         := $(ROOT_DIR)/common/util/get_group.py
-KERNEL_NAME      := VecAdd
-RS_SCRIPT        := $(CURDIR)/run_u55c.py
-SRC_DIR		     := $(CURDIR)/design
-AB_CONFIG        := $(CURDIR)/design/config/$(notdir $(RS_SCRIPT))/floorplan_config.json
-IMPL_CONFIG      := $(CURDIR)/design/config/$(notdir $(RS_SCRIPT))/impl_config.json
-LINK_CONFIG      := $(CURDIR)/design/config/$(notdir $(RS_SCRIPT))/link_config.ini
-FIX_NOC_TCL      := $(CURDIR)/design/config/$(notdir $(RS_SCRIPT))/fix_noc.tcl
-TARGET           := hw
-TEMP_DIR         := $(CURDIR)/build/$(notdir $(RS_SCRIPT))
-KERNEL_XO        := $(TEMP_DIR)/$(KERNEL_NAME).xo
-KERNEL_XCLBIN    := $(TEMP_DIR)/$(KERNEL_NAME).xclbin
-RS_XCLBIN        := $(TEMP_DIR)/dse/solution_0/vitis_run_hw/$(KERNEL_NAME)_$(PLATFORM).xclbin
-INCLUDE          := -I $(XILINX_HLS)/include
-CFLAGS           := $(INCLUDE) $(OPT_LEVEL)
-CXX              := g++
-HOST             := app.exe
-RS_TARGET        := $(TEMP_DIR)/dse/solution_0/updated.xo
-TIMING_RPT       := impl_1_hw_bb_locked_timing_summary_routed.rpt
-SUCCESS          := "Build Successful"
-SLACK_GETTER     := $(ROOT_DIR)/common/util/get_slack.py
-BUILD_LOG        := $(TEMP_DIR)/build.json
-RSXX             := rapidstream
-RSPATH           := $(CURDIR)
-RSPYTHON         := rapidstream
-DEVICE_CONFIG    := $(TEMP_DIR)/device.json
 
-all: $(RS_XCLBIN)
-	$(RSXX) $(SLACK_GETTER) -d $(TEMP_DIR) -i $(TIMING_RPT) -o $(BUILD_LOG)  -c clk_kernel_00_unbuffered_net -p 3.333
-	echo $(SUCCESS)
+ROOT_DIR            := $(shell git rev-parse --show-toplevel)
+PLATFORM            := xilinx_vck5000_gen4x8_qdma_2_202220_1
+PLATFORM_REPO_PATHS := /opt/xilinx/platforms
+XPFM_FILE           := $(PLATFORM_REPO_PATHS)/$(PLATFORM)/$(PLATFORM).xpfm
+SRC_DIR             := $(CURDIR)/design
+TARGET              := hw
+TEMP_DIR            := $(CURDIR)/build
+AIE_OBJ             := $(TEMP_DIR)/libadf.a
+KERNEL_NAMES        := krnl_input_mover krnl_output_mover
+XO_OBJS             := $(foreach kernel,$(KERNEL_NAMES),$(TEMP_DIR)/$(kernel)_$(TARGET).xo)
+EXECUTABLE          := $(TEMP_DIR)/host_overlay.exe
+XSA_OBJ             := $(TEMP_DIR)/overlay_$(TARGET).xsa
+XCLBIN              := $(TEMP_DIR)/overlay_$(TARGET).xclbin
+AXX                 := aiecompiler
+AX86XX              := x86simulator
+CXXFLAGS            := -std=c++17 -Wno-deprecated-declarations
+CXXFLAGS            += -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include
+LDFLAGS             := -L$(XILINX_XRT)/lib
+LDFLAGS             += $(LDFLAGS) -lxrt_coreutil
+VPP                 := v++
+CXX                 := g++
 
-$(RS_XCLBIN): $(RS_TARGET)
-	v++ -l -t ${TARGET} \
+
+all:$(EXECUTABLE) $(XCLBIN)
+
+$(EXECUTABLE): $(SRC_DIR)/host/host_overlay.cpp
+	@mkdir -p $(TEMP_DIR)
+	cd $(TEMP_DIR) && $(CXX) -o $(EXECUTABLE) $^ $(CXXFLAGS) $(LDFLAGS)
+
+$(XCLBIN): $(XSA_OBJ) $(AIE_OBJ)
+	cd $(TEMP_DIR) && $(VPP) -p -t $(TARGET) -f $(PLATFORM) $^ -o $@ --package.boot_mode=ospi
+
+$(XSA_OBJ): $(XO_OBJS) $(AIE_OBJ)
+	@mkdir -p $(TEMP_DIR)
+	@cd $(TEMP_DIR) && $(VPP) -l \
+	--kernel_frequency 200 \
 	--platform $(PLATFORM) \
-	--kernel $(KERNEL_NAME) \
-	--connectivity.nk $(KERNEL_NAME):1:$(KERNEL_NAME) \
-	--config $(LINK_CONFIG) \
-	--temp_dir $(TEMP_DIR) \
+	-t $(TARGET) \
+	-g \
+	--save-temps \
+	--config $(SRC_DIR)/cfg/xclbin_overlay.cfg \
 	-o $@ \
 	$^
 
-$(RS_TARGET):$(KERNEL_XO) $(DEVICE_CONFIG) $(AB_CONFIG)
-	mkdir -p $(TEMP_DIR)
-	cd $(RSPATH) && $(RSXX)-tapaopt \
-    --work-dir $(TEMP_DIR) \
-    --tapa-xo-path $< \
-    --device-config $(DEVICE_CONFIG) \
-    --floorplan-config $(AB_CONFIG) \
-    --implementation-config $(IMPL_CONFIG) \
-    --connectivity-ini $(LINK_CONFIG)
+$(XO_OBJS):$(TEMP_DIR)/%_$(TARGET).xo:$(SRC_DIR)/hls/%.cpp
+	@mkdir -p $(TEMP_DIR)
+	@cd $(TEMP_DIR) && $(VPP) --platform $(PLATFORM) -t $(TARGET) -c -k $* -o $@ $<
 
-device: $(DEVICE_CONFIG)
+ASIM: $(AIE_OBJ)
+	@echo "INFO:Running aiesimulator..."
+	@cd $(TEMP_DIR) && aiesimulator --pkg-dir=$(TEMP_DIR)/Work --profile
 
-$(DEVICE_CONFIG):$(RS_SCRIPT)
-	mkdir -p $(TEMP_DIR)
-	cd $(RSPATH) && $(RSPYTHON) $(RS_SCRIPT)
+aie_compile:$(AIE_OBJ)
 
-hw: $(KERNEL_XCLBIN)
+$(AIE_OBJ): $(SRC_DIR)/aie/*
+	@mkdir -p $(TEMP_DIR)/Work
+	@cd $(TEMP_DIR) && $(AXX) \
+	--target=$(TARGET) \
+	--platform=$(XPFM_FILE) \
+	--include="$(SRC_DIR)/aie" \
+	--workdir=$(TEMP_DIR)/Work \
+	$(SRC_DIR)/aie/VecAdd.cpp
 
-$(KERNEL_XCLBIN): $(KERNEL_XO)
-	v++ -l -t ${TARGET} \
-	--platform $(PLATFORM) \
-	--kernel $(KERNEL_NAME) \
-	--connectivity.nk $(KERNEL_NAME):1:$(KERNEL_NAME) \
-	--config $(LINK_CONFIG) \
-	--temp_dir $(TEMP_DIR) \
-	-o $@ \
-	$^
+run:
+	@cd $(TEMP_DIR) && ./host_overlay.exe $(XCLBIN)
 
-xo:$(KERNEL_XO)
+x86_compile:
+	@mkdir -p $(TEMP_DIR)/Work
+	@cd $(TEMP_DIR) && aiecompiler \
+	--target=x86sim \
+	--include="$(SRC_DIR)" \
+	--include="$(CURDIR)/common" \
+	--workdir=$(TEMP_DIR)/Work \
+	$(SRC_DIR)/aie/VecAdd.cpp
 
-$(KERNEL_XO):$(SRC_DIR)/$(KERNEL_NAME).cpp
-	mkdir -p $(TEMP_DIR)
-	cd $(TEMP_DIR) && tapa compile \
-	--top $(KERNEL_NAME) \
-	--part-num $(PART_NUM) \
-	--clock-period 3.33 \
-	-o $(KERNEL_NAME).xo \
-	-f $< \
-	2>&1 | tee tapa.log
-
-csim:$(TEMP_DIR)/main.exe
-	$(TEMP_DIR)/main.exe
-
-$(TEMP_DIR)/main.exe: $(SRC_DIR)/main.cpp $(SRC_DIR)/VecAdd.cpp
-	mkdir -p $(TEMP_DIR)
-	cd $(TEMP_DIR) && tapa g++ $^ $(INCLUDE) -o $@ -O2
-
-
-show_groups:
-	@echo $(RS_KERNEL_XCLBIN)
-	$(RSXX) $(GRP_UTIL) -i $(TEMP_DIR)/passes/1-importer.json \
-	-o $(TEMP_DIR)/module_types.csv
-
+run_x86:
+	@cd $(TEMP_DIR) && x86simulator --pkg-dir=./Work --dump
+	@diff data/s2_exp.txt $(TEMP_DIR)/data/s2_act.txt
+	@echo "PASS!"
 
 clean:
-	rm -rf $(TEMP_DIR) *.log
-	rm -rf .Xil .run
-	rm -rf *.exe
-	rm -rf .ipcache
+	-@rm -rf $(TEMP_DIR)
