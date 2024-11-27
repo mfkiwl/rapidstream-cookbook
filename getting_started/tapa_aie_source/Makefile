@@ -89,6 +89,7 @@ $(KERNEL_XO):$(SRC_DIR)/$(KERNEL_NAME).cpp
 	cd $(TEMP_DIR) && tapa compile \
 	--top $(KERNEL_NAME) \
 	--platform $(PLATFORM) \
+	--flow-type aie \
 	--clock-period 3.33  \
 	--keep-hls-work-dir \
 	-f $< \
