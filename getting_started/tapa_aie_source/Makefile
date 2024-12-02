@@ -2,9 +2,11 @@
 # The contributor(s) of this file has/have agreed to the RapidStream Contributor License Agreement.
 
 ROOT_DIR         := $(shell git rev-parse --show-toplevel)
-PLATFORM         := xilinx_vck5000_gen4x8_qdma_2_202220_1
 #/opt/xilinx/platforms/xilinx_vck5000_gen4x8_qdma_2_202220_1/xilinx_vck5000_gen4x8_qdma_2_202220_1.xpfm
 PART_NUM         := xcu280-fsvh2892-2L-e
+PLATFORM         := xilinx_vck5000_gen4x8_qdma_2_202220_1
+PLATFORM_REPO_PATHS := /opt/xilinx/platforms
+XPFM_FILE        := $(PLATFORM_REPO_PATHS)/$(PLATFORM)/$(PLATFORM).xpfm
 GRP_UTIL         := $(ROOT_DIR)/common/util/get_group.py
 KERNEL_NAME      := VecAdd
 RS_SCRIPT        := $(CURDIR)/run_u55c.py
@@ -31,6 +33,8 @@ RSXX             := rapidstream
 RSPATH           := $(CURDIR)
 RSPYTHON         := rapidstream
 DEVICE_CONFIG    := $(TEMP_DIR)/device.json
+AIE_OBJ          := $(TEMP_DIR)/libadf.a
+AXX              := aiecompiler
 
 all:clean $(KERNEL_XO)
 
@@ -107,6 +111,23 @@ show_groups:
 	@echo $(RS_KERNEL_XCLBIN)
 	$(RSXX) $(GRP_UTIL) -i $(TEMP_DIR)/passes/1-importer.json \
 	-o $(TEMP_DIR)/module_types.csv
+
+cp:
+	@cp $(CURDIR)/../aie_source_gmio/design/aie/*.h $(TEMP_DIR)/work.out/cpp/
+	@mv $(TEMP_DIR)/work.out/cpp/VecAdd.cpp $(TEMP_DIR)/work.out/cpp/VecAdd.h
+	@cp $(CURDIR)/../aie_source_gmio/design/aie/VecAdd.cpp $(TEMP_DIR)/work.out/cpp/
+	@echo "Copied files"
+
+aie_compile:$(AIE_OBJ)
+
+$(AIE_OBJ): $(TEMP_DIR)/work.out/cpp/*
+	@mkdir -p $(TEMP_DIR)/Work
+	@cd $(TEMP_DIR) && $(AXX) \
+	--target=$(TARGET) \
+	--platform=$(XPFM_FILE) \
+	--include="$(TEMP_DIR)/work.out/cpp" \
+	--workdir=$(TEMP_DIR)/Work \
+	$(TEMP_DIR)/work.out/cpp/VecAdd.cpp
 
 
 clean:
