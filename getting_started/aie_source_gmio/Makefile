@@ -50,17 +50,19 @@ $(XO_OBJS):$(TEMP_DIR)/%_$(TARGET).xo:$(SRC_DIR)/hls/%.cpp
 	@mkdir -p $(TEMP_DIR)
 	@cd $(TEMP_DIR) && $(VPP) --platform $(PLATFORM) -t $(TARGET) -c -k $* -o $@ $<
 
+
+ #--profile
 ASIM: $(AIE_OBJ)
 	@echo "INFO:Running aiesimulator..."
-	@cd $(TEMP_DIR) && aiesimulator --pkg-dir=$(TEMP_DIR)/Work --profile
+	@cd $(TEMP_DIR) && aiesimulator --pkg-dir=$(TEMP_DIR)/Work --dump-vcd foo
 
 aie_compile:$(AIE_OBJ)
 
 $(AIE_OBJ): $(SRC_DIR)/aie/*
 	@mkdir -p $(TEMP_DIR)/Work
 	@cd $(TEMP_DIR) && $(AXX) \
-	--target=$(TARGET) \
 	--platform=$(XPFM_FILE) \
+	--target=$(TARGET) \
 	--include="$(SRC_DIR)/aie" \
 	--workdir=$(TEMP_DIR)/Work \
 	$(SRC_DIR)/aie/VecAdd.cpp

@@ -22,7 +22,7 @@ add_kernel(tapa::istream<uint32_t>& a,
 
     // Compute the addition
     [[tapa::pipeline(1)]] for (int i = 0; i < DATA_NUM; i++) {
-        c << (a.read() + b.read());
+        c.write(a.read() + b.read());
     }
 }
 
