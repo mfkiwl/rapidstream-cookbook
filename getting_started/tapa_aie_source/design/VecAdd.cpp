@@ -9,10 +9,10 @@
 
 
 
-[[tapa::target("aie", "xilinx")]] void read_mem(tapa::mmap<const uint32_t> mem_in, tapa::ostream<uint32_t>& stream_out) {
+[[tapa::target("aie", "xilinx")]] void read_mem(tapa::immap<const uint32_t> mem_in, tapa::ostream<uint32_t>& stream_out) {
 
     for (int i = 0; i < DATA_NUM; i++) {
-        stream_out.write(mem_in[i]);
+        stream_out.write(window_readincr(mem_in));
     }
 }
 
@@ -24,14 +24,14 @@
     }
 }
 
-[[tapa::target("aie", "xilinx")]] void write_mem(tapa::istream<uint32_t>& stream_in, tapa::mmap<uint32_t> mem_out) {
+[[tapa::target("aie", "xilinx")]] void write_mem(tapa::istream<uint32_t>& stream_in, tapa::ommap<uint32_t> mem_out) {
 
     for (int i = 0; i < DATA_NUM; i++) {
-        mem_out[i] =  stream_in.read();
+        window_writeincr(mem_out, stream_in.read());
     }
 }
 
-[[tapa::target("aie", "xilinx")]] void VecAdd(tapa::mmap<const uint32_t> mem_in1, tapa::mmap<const uint32_t> mem_in2, tapa::mmap<uint32_t> mem_out) {
+[[tapa::target("aie", "xilinx")]] void VecAdd(tapa::immap<const uint32_t> mem_in1, tapa::immap<const uint32_t> mem_in2, tapa::ommap<uint32_t> mem_out) {
 
     tapa::stream<uint32_t> stream_in1("input_stream_1");
     tapa::stream<uint32_t> stream_in2("input_stream_2");

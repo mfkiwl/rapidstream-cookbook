@@ -70,6 +70,7 @@ $(KERNEL_XO):$(SRC_DIR)/$(KERNEL_NAME).cpp
 	cd $(TEMP_DIR) && tapa compile \
 	--top $(KERNEL_NAME) \
 	--part-num $(PART_NUM) \
+	--keep-hls-work-dir \
 	--clock-period 3.33 \
 	-o $(KERNEL_NAME).xo \
 	-f $< \

@@ -33,10 +33,10 @@ RSXX             := rapidstream
 RSPATH           := $(CURDIR)
 RSPYTHON         := rapidstream
 DEVICE_CONFIG    := $(TEMP_DIR)/device.json
-AIE_OBJ          := $(TEMP_DIR)/libadf.a
+AIE_OBJ          := $(TEMP_DIR)/work.out/aie/$(KERNEL_NAME)/libadf.a
 AXX              := aiecompiler
 
-all:clean $(KERNEL_XO)
+all:clean $(AIE_OBJ)
 
 all1: $(RS_XCLBIN)
 	$(RSXX) $(SLACK_GETTER) -d $(TEMP_DIR) -i $(TIMING_RPT) -o $(BUILD_LOG)  -c clk_kernel_00_unbuffered_net -p 3.333
